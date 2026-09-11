@@ -88,7 +88,11 @@ INSERT IGNORE INTO software (id, name) VALUES
 (1, 'Microsoft Office'), (2, 'Visual Studio Code'), (3, 'Wireshark'), (4, 'Adobe Photoshop');
 
 INSERT IGNORE INTO rooms (id, name, workstations) VALUES 
-(1, 'Raum A (IT-Sicherheit)', 20), (2, 'Raum B (Office)', 30);
+(1, 'Raum A (IT-Sicherheit)', 20), 
+(2, 'Raum B (Office)', 30),
+(3, 'Raum C (Netzwerk)', 15),
+(4, 'Raum D (Besprechung)', 10),
+(5, 'Raum E (Schulung)', 20);
 
 INSERT IGNORE INTO room_software (room_id, software_id) VALUES 
 (1, 2), (1, 3), (2, 1);

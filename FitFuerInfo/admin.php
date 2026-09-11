@@ -83,11 +83,26 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
             </form>
             
             <h3 style="margin-top: 2rem;">Alle Benutzer</h3>
-            <ul>
-                <?php foreach ($users as $u): ?>
-                    <li><?= htmlspecialchars($u['username']) ?> (<?= $u['role'] ?>)</li>
-                <?php endforeach; ?>
-            </ul>
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Rolle</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($users as $u): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($u['username']) ?></td>
+                            <td><?= htmlspecialchars($u['role']) ?></td>
+                            <td>
+                                <a href="user_edit.php?id=<?= $u['id'] ?>" class="btn">Bearbeiten</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
         
         <div style="flex: 1;">
@@ -106,11 +121,26 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
             </form>
             
             <h3 style="margin-top: 2rem;">Alle Räume</h3>
-            <ul>
-                <?php foreach ($rooms as $r): ?>
-                    <li><?= htmlspecialchars($r['name']) ?> (<?= $r['workstations'] ?> Plätze)</li>
-                <?php endforeach; ?>
-            </ul>
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Plätze</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rooms as $r): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($r['name']) ?></td>
+                            <td><?= htmlspecialchars($r['workstations']) ?></td>
+                            <td>
+                                <a href="room_edit.php?id=<?= $r['id'] ?>" class="btn">Bearbeiten</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

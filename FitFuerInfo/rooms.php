@@ -125,15 +125,52 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
                     
                     <div class="form-group">
                         <label>Räume auswählen (mehrere möglich)</label>
-                        <div style="border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 0.375rem; max-height: 150px; overflow-y: auto;">
+                        <input type="text" id="room-search" class="form-control" placeholder="🔍 Raum suchen (Name, Plätze...)" style="margin-bottom: 0.5rem;">
+                        <small id="room-search-count" style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;"><?= count($rooms) ?> Räume verfügbar</small>
+                        <div id="room-list" style="border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 0.375rem; max-height: 150px; overflow-y: auto;">
                             <?php foreach ($rooms as $r): ?>
-                                <label style="display: block; font-weight: normal; margin-bottom: 0.25rem;">
+                                <label class="room-item" style="display: block; font-weight: normal; margin-bottom: 0.25rem;" data-search="<?= htmlspecialchars(strtolower($r['name'] . ' ' . $r['workstations'] . ' plätze')) ?>">
                                     <input type="checkbox" name="room_ids[]" value="<?= $r['id'] ?>"> 
                                     <?= htmlspecialchars($r['name']) ?> (<?= $r['workstations'] ?> Plätze)
                                 </label>
                             <?php endforeach; ?>
+                            <div id="room-no-results" style="display: none; color: var(--text-muted); padding: 0.5rem; text-align: center;">Keine Räume gefunden.</div>
                         </div>
                     </div>
+
+                    <script>
+                    (function() {
+                        var searchInput = document.getElementById('room-search');
+                        var roomItems = document.querySelectorAll('.room-item');
+                        var noResults = document.getElementById('room-no-results');
+                        var countEl = document.getElementById('room-search-count');
+                        var total = roomItems.length;
+
+                        searchInput.addEventListener('input', function() {
+                            var query = this.value.toLowerCase().trim();
+                            var visible = 0;
+
+                            for (var i = 0; i < roomItems.length; i++) {
+                                var item = roomItems[i];
+                                var searchText = item.getAttribute('data-search');
+                                if (query === '' || searchText.indexOf(query) !== -1) {
+                                    item.style.display = 'block';
+                                    visible++;
+                                } else {
+                                    item.style.display = 'none';
+                                }
+                            }
+
+                            noResults.style.display = visible === 0 ? 'block' : 'none';
+
+                            if (query === '') {
+                                countEl.textContent = total + ' Räume verfügbar';
+                            } else {
+                                countEl.textContent = visible + ' von ' + total + ' Räumen';
+                            }
+                        });
+                    })();
+                    </script>
 
                     <div class="form-group">
                         <label for="course_id">Kurs auswählen</label>

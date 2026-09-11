@@ -82,15 +82,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 -- Dummy Data
 
--- Insert Systemverwalter (admin) / Password: admin123
-INSERT IGNORE INTO users (id, username, password_hash, role) VALUES 
-(1, 'admin', '$2y$10$wE1VpS6Q7M9yPZpP5dZg4eQx4j4Pz4zP5dZg4eQx4j4Pz4zP5dZg4', 'Systemverwalter');
--- Hash for admin123 (generated in standard PHP format, will need proper bcrypt hash if to be fully functional out of box. Let's use a real hash for 'admin123')
-UPDATE users SET password_hash = '$2y$10$6K.jR2gH0qA5c/s6Fz8D.OGlGjTqH1n/pWn.y8J0wOa9M5R5hGv.C' WHERE id = 1;
-
--- Insert Mitarbeiter (user) / Password: user123
-INSERT IGNORE INTO users (id, username, password_hash, role) VALUES 
-(2, 'mitarbeiter1', '$2y$10$wT2.kM6u8S1jL3yK2vN2xebz7wO9L1tB6mV8cX2xN1cE4sL9sZ3jK', 'Mitarbeiter');
+-- Dummy users removed to enforce setup.php on first visit
 
 INSERT IGNORE INTO software (id, name) VALUES 
 (1, 'Microsoft Office'), (2, 'Visual Studio Code'), (3, 'Wireshark'), (4, 'Adobe Photoshop');
@@ -101,12 +93,4 @@ INSERT IGNORE INTO rooms (id, name, workstations) VALUES
 INSERT IGNORE INTO room_software (room_id, software_id) VALUES 
 (1, 2), (1, 3), (2, 1);
 
-INSERT IGNORE INTO courses (id, title, max_participants, creator_id) VALUES 
-(1, 'Einführung IT-Sicherheit', 15, 2),
-(2, 'Office Grundlagen', 25, 2);
 
-INSERT IGNORE INTO course_owners (course_id, user_id) VALUES 
-(1, 2), (2, 2);
-
-INSERT IGNORE INTO course_software (course_id, software_id) VALUES 
-(1, 3), (2, 1);

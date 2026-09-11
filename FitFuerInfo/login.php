@@ -4,6 +4,16 @@ require_once 'includes/auth.php';
 
 $error = '';
 
+try {
+    $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+    if ($stmt->fetchColumn() == 0) {
+        header("Location: setup.php");
+        exit;
+    }
+} catch (PDOException $e) {
+    // Falls Tabelle nicht existiert, Fehler ignorieren (oder man könnte auch auf setup/db import hinweisen)
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];

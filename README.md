@@ -72,6 +72,3 @@
 - Darf ein Raum gleichzeitig für mehrere Kurse gebucht werden?
 - Gibt es weitere Benutzerrollen außer Mitarbeiter und Systemverwalter?
 - Soll die Website nur lokal im Firmennetzwerk erreichbar sein oder auch von außerhalb?
-
-
-powershell -Command "$p='.'; while(Get-ChildItem -Path $p -Filter *.zip -Recurse){ Get-ChildItem -Path $p -Filter *.zip -Recurse | ForEach-Object { Expand-Archive -Path $_.FullName -DestinationPath ($_.FullName -replace '\.zip$','') -Force; Remove-Item $_.FullName } }"

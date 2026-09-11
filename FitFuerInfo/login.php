@@ -15,25 +15,38 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
+    $client_ip = $_SERVER['REMOTE_ADDR'];
 
-    if (!empty($username) && !empty($password)) {
-        $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE username = ?");
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-            header("Location: index.php");
-            exit;
-        } else {
-            $error = 'Ungültiger Benutzername oder Passwort.';
-        }
+    // Brute-Force-Schutz: Prüfe ob IP gesperrt ist
+    if (isLoginLocked($client_ip)) {
+        $remaining = getLockoutRemaining($client_ip);
+        $minutes = ceil($remaining / 60);
+        $error = "Zu viele Fehlversuche. Bitte warten Sie $minutes Minute(n).";
     } else {
-        $error = 'Bitte füllen Sie alle Felder aus.';
+        $username = trim($_POST['username']);
+        $password = $_POST['password'];
+
+        if (!empty($username) && !empty($password)) {
+            $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE username = ?");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password_hash'])) {
+                // Erfolgreicher Login: Fehlversuche zurücksetzen
+                clearFailedLogins($client_ip);
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                header("Location: index.php");
+                exit;
+            } else {
+                // Fehlgeschlagener Login: Versuch registrieren
+                recordFailedLogin($client_ip);
+                $error = 'Ungültiger Benutzername oder Passwort.';
+            }
+        } else {
+            $error = 'Bitte füllen Sie alle Felder aus.';
+        }
     }
 }
 ?>

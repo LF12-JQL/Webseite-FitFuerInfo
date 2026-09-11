@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         $error = "Bitte Benutzername und Passwort ausfüllen.";
     } elseif (!validatePassword($password)) {
-        $error = "Passwort muss mindestens 4 Zeichen, einen Kleinbuchstaben und eine Zahl enthalten.";
+        $error = getPasswordErrors($password);
     } else {
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $hash = hashPassword($password);
         try {
             $stmt = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'Systemverwalter')");
             if ($stmt->execute([$username, $hash])) {
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="password">Passwort</label>
                     <input type="password" id="password" name="password" class="form-control" required>
-                    <small style="color: var(--text-muted);">Min. 4 Zeichen, 1 Zahl, 1 Kleinbuchstabe.</small>
+                    <small style="color: var(--text-muted);">Min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen.</small>
                 </div>
                 <button type="submit" class="btn" style="width: 100%;">Systemverwalter anlegen</button>
             </form>

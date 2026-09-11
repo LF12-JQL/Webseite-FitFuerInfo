@@ -32,9 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             try {
                 if (!empty($password)) {
                     if (!validatePassword($password)) {
-                        $error = 'Passwort muss min. 4 Zeichen, 1 Zahl und 1 Kleinbuchstaben enthalten.';
+                        $error = getPasswordErrors($password);
                     } else {
-                        $hash = password_hash($password, PASSWORD_DEFAULT);
+                        $hash = hashPassword($password);
                         $stmt = $pdo->prepare("UPDATE users SET username = ?, role = ?, password_hash = ? WHERE id = ?");
                         $stmt->execute([$username, $role, $hash, $target_user_id]);
                         $success = 'Benutzer erfolgreich aktualisiert.';

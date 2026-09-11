@@ -18,9 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($username) || empty($password)) {
                 $error = "Bitte Benutzername und Passwort ausfüllen.";
             } elseif (!validatePassword($password)) {
-                $error = "Passwort muss mindestens 4 Zeichen, einen Kleinbuchstaben und eine Zahl enthalten.";
+                $error = getPasswordErrors($password);
             } else {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $hash = hashPassword($password);
                 try {
                     $stmt = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)");
                     if ($stmt->execute([$username, $hash, $role])) {
@@ -69,7 +69,7 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
                     <input type="text" id="username" name="username" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Passwort (min. 4 Zeichen, 1 Kleinbuchstabe, 1 Zahl)</label>
+                    <label for="password">Passwort (min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen)</label>
                     <input type="password" id="password" name="password" class="form-control" required>
                 </div>
                 <div class="form-group">

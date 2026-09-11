@@ -131,7 +131,8 @@ function isLoginLocked($ip) {
 
     // Alte Einträge entfernen (älter als Sperrzeit)
     $cutoff = time() - LOGIN_LOCKOUT_DURATION;
-    $recent = array_filter($data['attempts'] ?? [], function ($ts) use ($cutoff) {
+    $attempts = isset($data['attempts']) ? $data['attempts'] : [];
+    $recent = array_filter($attempts, function ($ts) use ($cutoff) {
         return $ts > $cutoff;
     });
 
@@ -156,7 +157,8 @@ function getLockoutRemaining($ip) {
     }
 
     $cutoff = time() - LOGIN_LOCKOUT_DURATION;
-    $recent = array_filter($data['attempts'] ?? [], function ($ts) use ($cutoff) {
+    $attempts = isset($data['attempts']) ? $data['attempts'] : [];
+    $recent = array_filter($attempts, function ($ts) use ($cutoff) {
         return $ts > $cutoff;
     });
 
@@ -188,7 +190,8 @@ function recordFailedLogin($ip) {
 
     // Alte Einträge entfernen
     $cutoff = time() - LOGIN_LOCKOUT_DURATION;
-    $data['attempts'] = array_filter($data['attempts'] ?? [], function ($ts) use ($cutoff) {
+    $attempts = isset($data['attempts']) ? $data['attempts'] : [];
+    $data['attempts'] = array_filter($attempts, function ($ts) use ($cutoff) {
         return $ts > $cutoff;
     });
 

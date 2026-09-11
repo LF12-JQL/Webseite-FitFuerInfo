@@ -9,51 +9,81 @@ $success = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'book') {
-    $room_id = (int)$_POST['room_id'];
+    $room_ids = isset($_POST['room_ids']) ? $_POST['room_ids'] : [];
     $course_id = (int)$_POST['course_id'];
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
 
     // Basic validation
-    if ($room_id && $course_id && $start_time && $end_time && $start_time < $end_time) {
-        $room = getRoom($pdo, $room_id);
+    if (!empty($room_ids) && is_array($room_ids) && $course_id && $start_time && $end_time && $start_time < $end_time) {
         $course = getCourse($pdo, $course_id);
+        $course_sw = getCourseSoftware($pdo, $course_id);
         
-        // Check capacity
-        if ($course['max_participants'] > $room['workstations']) {
-            $error = 'Der Raum hat nicht genügend Arbeitsplätze für diesen Kurs.';
+        $total_workstations = 0;
+        $rooms_data = [];
+        
+        foreach ($room_ids as $r_id) {
+            $r_id = (int)$r_id;
+            $r_data = getRoom($pdo, $r_id);
+            if ($r_data) {
+                $total_workstations += $r_data['workstations'];
+                $rooms_data[] = $r_data;
+            }
+        }
+        
+        // Check capacity across all selected rooms
+        if ($course['max_participants'] > $total_workstations) {
+            $error = 'Die ausgewählten Räume haben in Summe nicht genügend Arbeitsplätze für diesen Kurs.';
         } else {
-            // Check software
-            $course_sw = getCourseSoftware($pdo, $course_id);
-            $room_sw = getRoomSoftware($pdo, $room_id);
-            
-            $room_sw_ids = array_column($room_sw, 'id');
+            // Check software for EACH selected room
             $missing_sw = false;
-            foreach ($course_sw as $csw) {
-                if (!in_array($csw['id'], $room_sw_ids)) {
-                    $missing_sw = true;
-                    break;
+            foreach ($rooms_data as $r_data) {
+                $room_sw = getRoomSoftware($pdo, $r_data['id']);
+                $room_sw_ids = array_column($room_sw, 'id');
+                
+                foreach ($course_sw as $csw) {
+                    if (!in_array($csw['id'], $room_sw_ids)) {
+                        $missing_sw = true;
+                        break 2; // Break out of both loops
+                    }
                 }
             }
             
             if ($missing_sw) {
-                $error = 'Der Raum verfügt nicht über alle für den Kurs benötigten Softwarepakete.';
+                $error = 'Einer oder mehrere der ausgewählten Räume verfügen nicht über alle für den Kurs benötigten Softwarepakete.';
             } else {
-                // Check overlaps
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE room_id = ? AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?))");
-                $stmt->execute([$room_id, $end_time, $start_time, $end_time, $start_time]);
-                if ($stmt->fetchColumn() > 0) {
-                    $error = 'Der Raum ist in diesem Zeitraum bereits gebucht.';
+                // Check overlaps for EACH selected room
+                $overlap = false;
+                foreach ($rooms_data as $r_data) {
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE room_id = ? AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?))");
+                    $stmt->execute([$r_data['id'], $end_time, $start_time, $end_time, $start_time]);
+                    if ($stmt->fetchColumn() > 0) {
+                        $overlap = true;
+                        break;
+                    }
+                }
+                
+                if ($overlap) {
+                    $error = 'Einer der ausgewählten Räume ist in diesem Zeitraum bereits gebucht.';
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO bookings (room_id, course_id, user_id, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
-                    if ($stmt->execute([$room_id, $course_id, $user_id, $start_time, $end_time])) {
-                        $success = 'Raum erfolgreich gebucht.';
+                    // All checks passed, insert bookings
+                    $pdo->beginTransaction();
+                    try {
+                        $stmt = $pdo->prepare("INSERT INTO bookings (room_id, course_id, user_id, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
+                        foreach ($rooms_data as $r_data) {
+                            $stmt->execute([$r_data['id'], $course_id, $user_id, $start_time, $end_time]);
+                        }
+                        $pdo->commit();
+                        $success = 'Räume erfolgreich gebucht.';
+                    } catch (Exception $e) {
+                        $pdo->rollBack();
+                        $error = 'Fehler beim Buchen der Räume.';
                     }
                 }
             }
         }
     } else {
-        $error = 'Ungültige Eingaben für die Buchung.';
+        $error = 'Ungültige Eingaben für die Buchung (Bitte mindestens einen Raum wählen).';
     }
 }
 
@@ -94,13 +124,15 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
                     <input type="hidden" name="action" value="book">
                     
                     <div class="form-group">
-                        <label for="room_id">Raum auswählen</label>
-                        <select id="room_id" name="room_id" class="form-control" required>
-                            <option value="">-- Bitte wählen --</option>
+                        <label>Räume auswählen (mehrere möglich)</label>
+                        <div style="border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 0.375rem; max-height: 150px; overflow-y: auto;">
                             <?php foreach ($rooms as $r): ?>
-                                <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?> (<?= $r['workstations'] ?> Plätze)</option>
+                                <label style="display: block; font-weight: normal; margin-bottom: 0.25rem;">
+                                    <input type="checkbox" name="room_ids[]" value="<?= $r['id'] ?>"> 
+                                    <?= htmlspecialchars($r['name']) ?> (<?= $r['workstations'] ?> Plätze)
+                                </label>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
                     </div>
 
                     <div class="form-group">

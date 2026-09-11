@@ -9,6 +9,7 @@ requireLogin();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FitFuerInfo - Raumbuchung</title>
+    <link rel="icon" type="image/jpeg" href="assets/favicon.jpg">
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>

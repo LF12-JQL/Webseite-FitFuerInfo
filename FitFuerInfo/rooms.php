@@ -125,11 +125,11 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
                     
                     <div class="form-group">
                         <label>Räume auswählen (mehrere möglich)</label>
-                        <input type="text" id="room-search" class="form-control" placeholder="🔍 Raum suchen (Name, Plätze...)" style="margin-bottom: 0.5rem;">
+                        <input type="text" id="room-search" class="form-control" placeholder="&#128269; Raum suchen (Name, Plätze...)" style="margin-bottom: 0.5rem;">
                         <small id="room-search-count" style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;"><?= count($rooms) ?> Räume verfügbar</small>
                         <div id="room-list" style="border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 0.375rem; max-height: 150px; overflow-y: auto;">
                             <?php foreach ($rooms as $r): ?>
-                                <label class="room-item" style="display: block; font-weight: normal; margin-bottom: 0.25rem;" data-search="<?= htmlspecialchars(strtolower($r['name'] . ' ' . $r['workstations'] . ' plätze')) ?>">
+                                <label class="room-item" style="display: block; font-weight: normal; margin-bottom: 0.25rem;">
                                     <input type="checkbox" name="room_ids[]" value="<?= $r['id'] ?>"> 
                                     <?= htmlspecialchars($r['name']) ?> (<?= $r['workstations'] ?> Plätze)
                                 </label>
@@ -152,7 +152,7 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
 
                             for (var i = 0; i < roomItems.length; i++) {
                                 var item = roomItems[i];
-                                var searchText = item.getAttribute('data-search');
+                                var searchText = item.textContent.toLowerCase();
                                 if (query === '' || searchText.indexOf(query) !== -1) {
                                     item.style.display = 'block';
                                     visible++;

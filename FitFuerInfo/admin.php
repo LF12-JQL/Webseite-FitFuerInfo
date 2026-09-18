@@ -105,7 +105,10 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
                 </div>
                 <div class="form-group">
                     <label for="password">Passwort (min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen)</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
+                    <input type="password" id="password" name="password" class="form-control" required onkeyup="updateStrengthMeter(this)">
+                    <div class="pwd-strength-container">
+                        <div class="pwd-strength-bar"></div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="role">Rolle</label>
@@ -265,6 +268,24 @@ function checkForUpdates() {
         }
     };
     xhr.send();
+}
+
+function updateStrengthMeter(input) {
+    const pwd = input.value;
+    let strength = 0;
+    if (pwd.length >= 8) strength += 20;
+    if (pwd.match(/[a-z]+/)) strength += 20;
+    if (pwd.match(/[A-Z]+/)) strength += 20;
+    if (pwd.match(/[0-9]+/)) strength += 20;
+    if (pwd.match(/[^a-zA-Z0-9]+/)) strength += 20;
+
+    const bar = input.parentNode.querySelector('.pwd-strength-bar');
+    if (!bar) return;
+    
+    bar.style.width = strength + '%';
+    if (strength <= 40) bar.style.backgroundColor = 'var(--error-color)';
+    else if (strength <= 80) bar.style.backgroundColor = '#F59E0B';
+    else bar.style.backgroundColor = 'var(--secondary-color)';
 }
 
 function escapeHtml(text) {

@@ -92,7 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             <input type="hidden" name="action" value="change_password_admin">
             <div class="form-group">
                 <label for="new_password">Neues Passwort</label>
-                <input type="password" id="new_password" name="new_password" class="form-control" required>
+                <input type="password" id="new_password" name="new_password" class="form-control" required onkeyup="updateStrengthMeter(this)">
+                <div class="pwd-strength-container">
+                    <div class="pwd-strength-bar"></div>
+                </div>
                 <small style="color: var(--text-muted);">Min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen.</small>
             </div>
             <div class="form-group">
@@ -120,7 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 <input type="hidden" name="action" value="change_password">
                 <div class="form-group">
                     <label for="new_password">Neues Passwort</label>
-                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required onkeyup="updateStrengthMeter(this)">
+                    <div class="pwd-strength-container">
+                        <div class="pwd-strength-bar"></div>
+                    </div>
                     <small style="color: var(--text-muted);">Min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen.</small>
                 </div>
                 <div class="form-group">
@@ -134,5 +140,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 </div>
 
 </div>
+<script>
+function updateStrengthMeter(input) {
+    const pwd = input.value;
+    let strength = 0;
+    if (pwd.length >= 8) strength += 20;
+    if (pwd.match(/[a-z]+/)) strength += 20;
+    if (pwd.match(/[A-Z]+/)) strength += 20;
+    if (pwd.match(/[0-9]+/)) strength += 20;
+    if (pwd.match(/[^a-zA-Z0-9]+/)) strength += 20;
+
+    const bar = input.parentNode.querySelector('.pwd-strength-bar');
+    if (!bar) return;
+    
+    bar.style.width = strength + '%';
+    if (strength <= 40) bar.style.backgroundColor = 'var(--error-color)';
+    else if (strength <= 80) bar.style.backgroundColor = '#F59E0B'; // yellow-orange
+    else bar.style.backgroundColor = 'var(--secondary-color)'; // green
+}
+</script>
 </body>
 </html>

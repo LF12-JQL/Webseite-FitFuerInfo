@@ -47,12 +47,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $error = "Ungültige Raumdaten.";
             }
+        } elseif ($_POST['action'] === 'approve_password') {
+            $req_user_id = (int)$_POST['user_id'];
+            try {
+                $stmt = $pdo->prepare("UPDATE users SET password_change_status = 'approved' WHERE id = ?");
+                $stmt->execute([$req_user_id]);
+                $success = "Antrag auf Passwortänderung genehmigt.";
+            } catch (Exception $e) {
+                $error = "Fehler beim Genehmigen des Antrags.";
+            }
+        } elseif ($_POST['action'] === 'reject_password') {
+            $req_user_id = (int)$_POST['user_id'];
+            try {
+                $stmt = $pdo->prepare("UPDATE users SET password_change_status = 'none' WHERE id = ?");
+                $stmt->execute([$req_user_id]);
+                $success = "Antrag auf Passwortänderung abgelehnt.";
+            } catch (Exception $e) {
+                $error = "Fehler beim Ablehnen des Antrags.";
+            }
         }
     }
 }
 
 $users = $pdo->query("SELECT id, username, role FROM users ORDER BY username")->fetchAll();
 $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
+$password_requests = $pdo->query("SELECT id, username FROM users WHERE password_change_status = 'requested'")->fetchAll();
 ?>
 
 <div class="card">
@@ -151,6 +170,43 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
             </table>
         </div>
     </div>
+    
+    <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+        <h3>Genehmigungen</h3>
+        <?php if (count($password_requests) > 0): ?>
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($password_requests as $req): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($req['username']) ?> möchte sein Passwort ändern.</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <form method="POST" action="" style="margin: 0;">
+                                        <input type="hidden" name="action" value="approve_password">
+                                        <input type="hidden" name="user_id" value="<?= $req['id'] ?>">
+                                        <button type="submit" class="btn" style="background-color: #28a745;">Genehmigen</button>
+                                    </form>
+                                    <form method="POST" action="" style="margin: 0;">
+                                        <input type="hidden" name="action" value="reject_password">
+                                        <input type="hidden" name="user_id" value="<?= $req['id'] ?>">
+                                        <button type="submit" class="btn btn-secondary" style="background-color: var(--error-color); color: white; border: none;">Ablehnen</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p style="color: var(--text-muted);">Aktuell liegen keine Anträge vor.</p>
+        <?php endif; ?>
+    </div>
 </div>
 
 </div>
@@ -164,7 +220,7 @@ function checkForUpdates() {
     btn.disabled = true;
     btn.textContent = 'Pr\u00fcfe...';
     resultDiv.style.display = 'block';
-    resultDiv.innerHTML = '<div style="color: var(--text-muted); padding: 0.75rem;">Verbindung zu GitHub wird hergestellt...</div>';
+    resultDiv.innerHTML = '<div style="color: var(--text-muted); padding: 0.75rem;">Verbindung zum Update-Server wird hergestellt...</div>';
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'check_update.php', true);
@@ -186,7 +242,7 @@ function checkForUpdates() {
                         resultDiv.innerHTML = '<div class="alert" style="background-color: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 1rem; border-radius: 0.375rem;">' +
                             '<strong>&#9888; Update verf\u00fcgbar!</strong><br>' +
                             escapeHtml(data.message) + '<br><br>' +
-                            '<a href="' + escapeHtml(data.download_url) + '" target="_blank" class="btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Zur GitHub-Seite (herunterladen)</a>' +
+                            '<a href="' + escapeHtml(data.download_url) + '" target="_blank" class="btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Zur Download-Seite (herunterladen)</a>' +
                             '</div>';
                     } else {
                         resultDiv.innerHTML = '<div class="alert alert-success">' +

@@ -30,7 +30,7 @@ if ($response === false) {
     $response_tags = @file_get_contents($url_tags, false, $context);
 
     if ($response_tags === false) {
-        echo json_encode(array('error' => 'GitHub konnte nicht erreicht werden.'));
+        echo json_encode(array('error' => 'Server konnte nicht erreicht werden.'));
         exit;
     }
 
@@ -40,7 +40,7 @@ if ($response === false) {
             'current' => APP_VERSION,
             'latest' => APP_VERSION,
             'update_available' => false,
-            'message' => 'Keine Versionen auf GitHub gefunden. Sie verwenden Version ' . APP_VERSION . '.'
+            'message' => 'Keine Versionen gefunden. Sie verwenden Version ' . APP_VERSION . '.'
         ));
         exit;
     }

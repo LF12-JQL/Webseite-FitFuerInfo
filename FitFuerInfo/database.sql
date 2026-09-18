@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    role ENUM('Mitarbeiter', 'Systemverwalter') NOT NULL DEFAULT 'Mitarbeiter'
+    role ENUM('Mitarbeiter', 'Systemverwalter') NOT NULL DEFAULT 'Mitarbeiter',
+    password_change_status ENUM('none', 'requested', 'approved') NOT NULL DEFAULT 'none'
 ) ENGINE=InnoDB;
 
 -- Software packages

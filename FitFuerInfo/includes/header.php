@@ -18,6 +18,7 @@ requireLogin();
         <nav>
             <ul>
                 <li><a href="index.php">Dashboard</a></li>
+                <li><a href="profile.php">Profil</a></li>
                 <li><a href="courses.php">Kurse</a></li>
                 <li><a href="rooms.php">Räume & Buchung</a></li>
                 <?php if (isSystemverwalter()): ?>

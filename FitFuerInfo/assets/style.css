@@ -163,7 +163,12 @@ th {
     margin: 10vh auto;
 }
 
-body.dark-mode {
+nav a.relative-link {
+    position: relative;
+    display: inline-block;
+}
+
+html.dark-mode {
     --background: #111827;
     --card-bg: #1F2937;
     --text-main: #F9FAFB;
@@ -176,46 +181,49 @@ body.dark-mode {
     color: var(--text-main);
 }
 
-body.dark-mode .form-control {
+html.dark-mode .form-control {
     background-color: #374151;
     color: #F9FAFB;
     border-color: #4B5563;
 }
 
-body.dark-mode .form-control:focus {
+html.dark-mode .form-control:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
-body.dark-mode th {
+html.dark-mode th {
     background-color: #374151;
     color: #F9FAFB;
 }
 
-body.dark-mode td {
+html.dark-mode td {
     border-bottom-color: var(--border-color);
 }
 
-body.dark-mode .alert-error {
+html.dark-mode .alert-error {
     background-color: #7F1D1D;
     color: #FECACA;
     border-color: #991B1B;
 }
 
-body.dark-mode .alert-success {
+html.dark-mode .alert-success {
     background-color: #064E3B;
     color: #D1FAE5;
     border-color: #065F46;
 }
 
 .badge {
-    background-color: var(--error-color);
+    position: absolute;
+    top: -6px;
+    right: -14px;
+    background-color: #FF3B30;
     color: white;
-    font-size: 0.75rem;
-    padding: 0.15rem 0.4rem;
-    border-radius: 9999px;
-    margin-left: 0.25rem;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.35rem;
+    border-radius: 50%;
+    min-width: 1.2rem;
+    text-align: center;
     font-weight: bold;
-    display: inline-block;
-    vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

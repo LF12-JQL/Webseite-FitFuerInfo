@@ -2,6 +2,7 @@
 // admin.php
 require_once 'includes/db.php';
 require_once 'includes/functions.php';
+require_once 'includes/version.php';
 require_once 'includes/header.php';
 requireSystemverwalter();
 
@@ -55,7 +56,14 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
 ?>
 
 <div class="card">
-    <h2>Verwaltungsbereich</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="margin: 0;">Verwaltungsbereich</h2>
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Version: <strong><?= APP_VERSION ?></strong></span>
+            <button type="button" id="btn-update-check" class="btn btn-secondary" onclick="checkForUpdates()" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Auf Updates pr&uuml;fen</button>
+        </div>
+    </div>
+    <div id="update-result" style="display: none; margin-top: 1rem;"></div>
     <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
@@ -147,4 +155,59 @@ $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
 
 </div>
 </body>
+
+<script>
+function checkForUpdates() {
+    var btn = document.getElementById('btn-update-check');
+    var resultDiv = document.getElementById('update-result');
+
+    btn.disabled = true;
+    btn.textContent = 'Pr\u00fcfe...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div style="color: var(--text-muted); padding: 0.75rem;">Verbindung zu GitHub wird hergestellt...</div>';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'check_update.php', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            btn.disabled = false;
+            btn.textContent = 'Auf Updates pr\u00fcfen';
+
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+
+                    if (data.error) {
+                        resultDiv.innerHTML = '<div class="alert alert-error">' + escapeHtml(data.error) + '</div>';
+                        return;
+                    }
+
+                    if (data.update_available) {
+                        resultDiv.innerHTML = '<div class="alert" style="background-color: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 1rem; border-radius: 0.375rem;">' +
+                            '<strong>&#9888; Update verf\u00fcgbar!</strong><br>' +
+                            escapeHtml(data.message) + '<br><br>' +
+                            '<a href="' + escapeHtml(data.download_url) + '" target="_blank" class="btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Zur GitHub-Seite (herunterladen)</a>' +
+                            '</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="alert alert-success">' +
+                            '<strong>&#10003; Alles aktuell!</strong> ' + escapeHtml(data.message) +
+                            '</div>';
+                    }
+                } catch (e) {
+                    resultDiv.innerHTML = '<div class="alert alert-error">Fehler beim Verarbeiten der Antwort.</div>';
+                }
+            } else {
+                resultDiv.innerHTML = '<div class="alert alert-error">Verbindung fehlgeschlagen (HTTP ' + xhr.status + ').</div>';
+            }
+        }
+    };
+    xhr.send();
+}
+
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+</script>
 </html>

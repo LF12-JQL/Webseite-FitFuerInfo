@@ -18,9 +18,12 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
+    $password_confirm = $_POST['password_confirm'];
 
     if (empty($username) || empty($password)) {
         $error = "Bitte Benutzername und Passwort ausfüllen.";
+    } elseif ($password !== $password_confirm) {
+        $error = "Die Passwörter stimmen nicht überein.";
     } elseif (!validatePassword($password)) {
         $error = getPasswordErrors($password);
     } else {
@@ -66,6 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="password">Passwort</label>
                     <input type="password" id="password" name="password" class="form-control" required>
                     <small style="color: var(--text-muted);">Min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen.</small>
+                </div>
+                <div class="form-group">
+                    <label for="password_confirm">Passwort bestätigen</label>
+                    <input type="password" id="password_confirm" name="password_confirm" class="form-control" required>
                 </div>
                 <button type="submit" class="btn" style="width: 100%;">Systemverwalter anlegen</button>
             </form>

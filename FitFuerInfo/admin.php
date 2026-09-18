@@ -65,6 +65,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (Exception $e) {
                 $error = "Fehler beim Ablehnen des Antrags.";
             }
+        } elseif ($_POST['action'] === 'add_software') {
+            $name = trim($_POST['software_name']);
+            if (!empty($name)) {
+                try {
+                    $stmt = $pdo->prepare("INSERT INTO software (name) VALUES (?)");
+                    if ($stmt->execute([$name])) {
+                        $success = "Software erfolgreich hinzugefügt.";
+                    }
+                } catch (Exception $e) {
+                    $error = "Fehler: Die Software existiert vermutlich bereits.";
+                }
+            } else {
+                $error = "Bitte einen Softwarenamen eingeben.";
+            }
+        } elseif ($_POST['action'] === 'delete_software') {
+            $software_id = (int)$_POST['software_id'];
+            try {
+                $stmt = $pdo->prepare("DELETE FROM software WHERE id = ?");
+                $stmt->execute([$software_id]);
+                $success = "Software erfolgreich entfernt.";
+            } catch (Exception $e) {
+                $error = "Fehler beim Löschen der Software.";
+            }
         }
     }
 }
@@ -72,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $users = $pdo->query("SELECT id, username, role FROM users ORDER BY username")->fetchAll();
 $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
 $password_requests = $pdo->query("SELECT id, username FROM users WHERE password_change_status = 'requested'")->fetchAll();
+$software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll();
 ?>
 
 <div class="card">
@@ -169,6 +193,42 @@ $password_requests = $pdo->query("SELECT id, username FROM users WHERE password_
                 </tbody>
             </table>
         </div>
+    </div>
+    
+    <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+        <h3>Software verwalten</h3>
+        <form method="POST" action="" style="display: flex; gap: 1rem; max-width: 400px; margin-bottom: 2rem;">
+            <input type="hidden" name="action" value="add_software">
+            <input type="text" name="software_name" class="form-control" placeholder="Neuer Softwarename" required style="flex: 1;">
+            <button type="submit" class="btn">Hinzufügen</button>
+        </form>
+        
+        <?php if (count($software_list) > 0): ?>
+            <table style="width: 100%; max-width: 600px;">
+                <thead>
+                    <tr>
+                        <th>Softwarename</th>
+                        <th style="width: 100px;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($software_list as $sw): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($sw['name']) ?></td>
+                            <td>
+                                <form method="POST" action="" style="margin: 0;" onsubmit="return confirm('Möchten Sie diese Software wirklich löschen? Sie wird aus allen Räumen und Kursen entfernt.');">
+                                    <input type="hidden" name="action" value="delete_software">
+                                    <input type="hidden" name="software_id" value="<?= $sw['id'] ?>">
+                                    <button type="submit" class="btn btn-secondary" style="background-color: var(--error-color); color: white; border: none; padding: 0.3rem 0.6rem; font-size: 0.85rem;">Löschen</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p style="color: var(--text-muted);">Noch keine Software eingetragen.</p>
+        <?php endif; ?>
     </div>
     
     <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">

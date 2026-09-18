@@ -162,3 +162,52 @@ th {
     max-width: 400px;
     margin: 10vh auto;
 }
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #111827;
+        --card-bg: #1F2937;
+        --text-main: #F9FAFB;
+        --text-muted: #9CA3AF;
+        --border-color: #374151;
+        --primary-color: #6366F1;
+        --primary-hover: #4F46E5;
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--text-main);
+    }
+
+    .form-control {
+        background-color: #374151;
+        color: #F9FAFB;
+        border-color: #4B5563;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    th {
+        background-color: #374151;
+        color: #F9FAFB;
+    }
+
+    td {
+        border-bottom-color: var(--border-color);
+    }
+
+    .alert-error {
+        background-color: #7F1D1D;
+        color: #FECACA;
+        border-color: #991B1B;
+    }
+
+    .alert-success {
+        background-color: #064E3B;
+        color: #D1FAE5;
+        border-color: #065F46;
+    }
+}

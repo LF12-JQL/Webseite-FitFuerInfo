@@ -47,27 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $error = "Ungültige Raumdaten.";
             }
-        } elseif ($_POST['action'] === 'approve_password') {
-            $req_user_id = (int)$_POST['user_id'];
-            try {
-                $stmt = $pdo->prepare("UPDATE users SET password_change_status = 'approved' WHERE id = ?");
-                $stmt->execute([$req_user_id]);
-                $success = "Antrag auf Passwortänderung genehmigt.";
-            } catch (Exception $e) {
-                $error = "Fehler beim Genehmigen des Antrags.";
-            }
-        } elseif ($_POST['action'] === 'reject_password') {
-            $req_user_id = (int)$_POST['user_id'];
-            try {
-                $stmt = $pdo->prepare("UPDATE users SET password_change_status = 'none' WHERE id = ?");
-                $stmt->execute([$req_user_id]);
-                $success = "Antrag auf Passwortänderung abgelehnt.";
-            } catch (Exception $e) {
-                $error = "Fehler beim Ablehnen des Antrags.";
-            }
         } elseif ($_POST['action'] === 'add_software') {
             $name = trim($_POST['software_name']);
-            if (!empty($name)) {
+            if (empty($name)) {
+                $error = "Bitte einen Softwarenamen eingeben.";
+            } elseif (strlen($name) > 25) {
+                $error = "Fehler: Der Softwarename darf maximal 25 Zeichen lang sein.";
+            } else {
                 try {
                     $stmt = $pdo->prepare("INSERT INTO software (name) VALUES (?)");
                     if ($stmt->execute([$name])) {
@@ -76,8 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } catch (Exception $e) {
                     $error = "Fehler: Die Software existiert vermutlich bereits.";
                 }
-            } else {
-                $error = "Bitte einen Softwarenamen eingeben.";
             }
         } elseif ($_POST['action'] === 'delete_software') {
             $software_id = (int)$_POST['software_id'];
@@ -94,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $users = $pdo->query("SELECT id, username, role FROM users ORDER BY username")->fetchAll();
 $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
-$password_requests = $pdo->query("SELECT id, username FROM users WHERE password_change_status = 'requested'")->fetchAll();
+$software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll();
 $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll();
 ?>
 
@@ -195,11 +179,11 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
         </div>
     </div>
     
-    <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+    <div id="software" style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
         <h3>Software verwalten</h3>
-        <form method="POST" action="" style="display: flex; gap: 1rem; max-width: 400px; margin-bottom: 2rem;">
+        <form method="POST" action="#software" style="display: flex; gap: 1rem; max-width: 400px; margin-bottom: 2rem;">
             <input type="hidden" name="action" value="add_software">
-            <input type="text" name="software_name" class="form-control" placeholder="Neuer Softwarename" required style="flex: 1;">
+            <input type="text" name="software_name" class="form-control" placeholder="Neuer Softwarename" maxlength="25" required style="flex: 1;">
             <button type="submit" class="btn">Hinzufügen</button>
         </form>
         
@@ -216,7 +200,7 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
                         <tr>
                             <td><?= htmlspecialchars($sw['name']) ?></td>
                             <td>
-                                <form method="POST" action="" style="margin: 0;" onsubmit="return confirm('Möchten Sie diese Software wirklich löschen? Sie wird aus allen Räumen und Kursen entfernt.');">
+                                <form method="POST" action="#software" style="margin: 0;" onsubmit="return confirm('Möchten Sie diese Software wirklich löschen? Sie wird aus allen Räumen und Kursen entfernt.');">
                                     <input type="hidden" name="action" value="delete_software">
                                     <input type="hidden" name="software_id" value="<?= $sw['id'] ?>">
                                     <button type="submit" class="btn btn-secondary" style="background-color: var(--error-color); color: white; border: none; padding: 0.3rem 0.6rem; font-size: 0.85rem;">Löschen</button>
@@ -228,43 +212,6 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
             </table>
         <?php else: ?>
             <p style="color: var(--text-muted);">Noch keine Software eingetragen.</p>
-        <?php endif; ?>
-    </div>
-    
-    <div style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
-        <h3>Genehmigungen</h3>
-        <?php if (count($password_requests) > 0): ?>
-            <table style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($password_requests as $req): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($req['username']) ?> möchte sein Passwort ändern.</td>
-                            <td>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <form method="POST" action="" style="margin: 0;">
-                                        <input type="hidden" name="action" value="approve_password">
-                                        <input type="hidden" name="user_id" value="<?= $req['id'] ?>">
-                                        <button type="submit" class="btn" style="background-color: #28a745;">Genehmigen</button>
-                                    </form>
-                                    <form method="POST" action="" style="margin: 0;">
-                                        <input type="hidden" name="action" value="reject_password">
-                                        <input type="hidden" name="user_id" value="<?= $req['id'] ?>">
-                                        <button type="submit" class="btn btn-secondary" style="background-color: var(--error-color); color: white; border: none;">Ablehnen</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <p style="color: var(--text-muted);">Aktuell liegen keine Anträge vor.</p>
         <?php endif; ?>
     </div>
 </div>

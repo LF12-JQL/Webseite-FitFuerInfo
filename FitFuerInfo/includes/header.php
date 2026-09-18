@@ -23,6 +23,7 @@ requireLogin();
                 <li><a href="rooms.php">Räume & Buchung</a></li>
                 <?php if (isSystemverwalter()): ?>
                 <li><a href="admin.php">Verwaltung</a></li>
+                <li><a href="approvals.php">Genehmigungen</a></li>
                 <?php endif; ?>
                 <li><a href="logout.php" class="btn btn-secondary">Abmelden (<?= htmlspecialchars($_SESSION['username']) ?>)</a></li>
             </ul>

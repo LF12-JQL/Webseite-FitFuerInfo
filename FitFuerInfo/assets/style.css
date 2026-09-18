@@ -163,51 +163,59 @@ th {
     margin: 10vh auto;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #111827;
-        --card-bg: #1F2937;
-        --text-main: #F9FAFB;
-        --text-muted: #9CA3AF;
-        --border-color: #374151;
-        --primary-color: #6366F1;
-        --primary-hover: #4F46E5;
-    }
+body.dark-mode {
+    --background: #111827;
+    --card-bg: #1F2937;
+    --text-main: #F9FAFB;
+    --text-muted: #9CA3AF;
+    --border-color: #374151;
+    --primary-color: #6366F1;
+    --primary-hover: #4F46E5;
+    
+    background-color: var(--background);
+    color: var(--text-main);
+}
 
-    body {
-        background-color: var(--background);
-        color: var(--text-main);
-    }
+body.dark-mode .form-control {
+    background-color: #374151;
+    color: #F9FAFB;
+    border-color: #4B5563;
+}
 
-    .form-control {
-        background-color: #374151;
-        color: #F9FAFB;
-        border-color: #4B5563;
-    }
+body.dark-mode .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
 
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
+body.dark-mode th {
+    background-color: #374151;
+    color: #F9FAFB;
+}
 
-    th {
-        background-color: #374151;
-        color: #F9FAFB;
-    }
+body.dark-mode td {
+    border-bottom-color: var(--border-color);
+}
 
-    td {
-        border-bottom-color: var(--border-color);
-    }
+body.dark-mode .alert-error {
+    background-color: #7F1D1D;
+    color: #FECACA;
+    border-color: #991B1B;
+}
 
-    .alert-error {
-        background-color: #7F1D1D;
-        color: #FECACA;
-        border-color: #991B1B;
-    }
+body.dark-mode .alert-success {
+    background-color: #064E3B;
+    color: #D1FAE5;
+    border-color: #065F46;
+}
 
-    .alert-success {
-        background-color: #064E3B;
-        color: #D1FAE5;
-        border-color: #065F46;
-    }
+.badge {
+    background-color: var(--error-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 9999px;
+    margin-left: 0.25rem;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: middle;
 }

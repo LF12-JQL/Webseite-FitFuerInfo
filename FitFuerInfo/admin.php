@@ -2,7 +2,6 @@
 // admin.php
 require_once 'includes/db.php';
 require_once 'includes/functions.php';
-require_once 'includes/version.php';
 require_once 'includes/header.php';
 requireSystemverwalter();
 
@@ -83,14 +82,7 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
 ?>
 
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h2 style="margin: 0;">Verwaltungsbereich</h2>
-        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <span style="color: var(--text-muted); font-size: 0.9rem;">Version: <strong><?= APP_VERSION ?></strong></span>
-            <button type="button" id="btn-update-check" class="btn btn-secondary" onclick="checkForUpdates()" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Auf Updates pr&uuml;fen</button>
-        </div>
-    </div>
-    <div id="update-result" style="display: none; margin-top: 1rem;"></div>
+    <h2>Verwaltungsbereich</h2>
     <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
@@ -105,10 +97,7 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
                 </div>
                 <div class="form-group">
                     <label for="password">Passwort (min. 8 Zeichen, Groß-/Kleinbuchstabe, Zahl, Sonderzeichen)</label>
-                    <input type="password" id="password" name="password" class="form-control" required onkeyup="updateStrengthMeter(this)">
-                    <div class="pwd-strength-container">
-                        <div class="pwd-strength-bar"></div>
-                    </div>
+                    <input type="password" id="password" name="password" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label for="role">Rolle</label>
@@ -221,77 +210,4 @@ $software_list = $pdo->query("SELECT * FROM software ORDER BY name")->fetchAll()
 
 </div>
 </body>
-
-<script>
-function checkForUpdates() {
-    var btn = document.getElementById('btn-update-check');
-    var resultDiv = document.getElementById('update-result');
-
-    btn.disabled = true;
-    btn.textContent = 'Pr\u00fcfe...';
-    resultDiv.style.display = 'block';
-    resultDiv.innerHTML = '<div style="color: var(--text-muted); padding: 0.75rem;">Verbindung zum Update-Server wird hergestellt...</div>';
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'check_update.php', true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            btn.disabled = false;
-            btn.textContent = 'Auf Updates pr\u00fcfen';
-
-            if (xhr.status === 200) {
-                try {
-                    var data = JSON.parse(xhr.responseText);
-
-                    if (data.error) {
-                        resultDiv.innerHTML = '<div class="alert alert-error">' + escapeHtml(data.error) + '</div>';
-                        return;
-                    }
-
-                    if (data.update_available) {
-                        resultDiv.innerHTML = '<div class="alert" style="background-color: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 1rem; border-radius: 0.375rem;">' +
-                            '<strong>&#9888; Update verf\u00fcgbar!</strong><br>' +
-                            escapeHtml(data.message) + '<br><br>' +
-                            '<a href="' + escapeHtml(data.download_url) + '" target="_blank" class="btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">Zur Download-Seite (herunterladen)</a>' +
-                            '</div>';
-                    } else {
-                        resultDiv.innerHTML = '<div class="alert alert-success">' +
-                            '<strong>&#10003; Alles aktuell!</strong> ' + escapeHtml(data.message) +
-                            '</div>';
-                    }
-                } catch (e) {
-                    resultDiv.innerHTML = '<div class="alert alert-error">Fehler beim Verarbeiten der Antwort.</div>';
-                }
-            } else {
-                resultDiv.innerHTML = '<div class="alert alert-error">Verbindung fehlgeschlagen (HTTP ' + xhr.status + ').</div>';
-            }
-        }
-    };
-    xhr.send();
-}
-
-function updateStrengthMeter(input) {
-    const pwd = input.value;
-    let strength = 0;
-    if (pwd.length >= 8) strength += 20;
-    if (pwd.match(/[a-z]+/)) strength += 20;
-    if (pwd.match(/[A-Z]+/)) strength += 20;
-    if (pwd.match(/[0-9]+/)) strength += 20;
-    if (pwd.match(/[^a-zA-Z0-9]+/)) strength += 20;
-
-    const bar = input.parentNode.querySelector('.pwd-strength-bar');
-    if (!bar) return;
-    
-    bar.style.width = strength + '%';
-    if (strength <= 40) bar.style.backgroundColor = 'var(--error-color)';
-    else if (strength <= 80) bar.style.backgroundColor = '#F59E0B';
-    else bar.style.backgroundColor = 'var(--secondary-color)';
-}
-
-function escapeHtml(text) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(text));
-    return div.innerHTML;
-}
-</script>
 </html>

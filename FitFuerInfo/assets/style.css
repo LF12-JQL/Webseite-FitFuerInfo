@@ -228,22 +228,6 @@ html.dark-mode .alert-success {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* Password Strength Meter */
-.pwd-strength-container {
-    height: 6px;
-    background-color: var(--border-color);
-    border-radius: 3px;
-    margin-top: 0.5rem;
-    overflow: hidden;
-    width: 100%;
-}
-.pwd-strength-bar {
-    height: 100%;
-    width: 0;
-    background-color: var(--error-color);
-    transition: width 0.3s ease, background-color 0.3s ease;
-}
-
 /* Dashboard Improvements */
 .dashboard-list {
     list-style: none;

@@ -5,7 +5,7 @@ require_once 'includes/auth.php';
 
 header('Content-Type: application/json');
 
-// Session check
+// Sitzung prüfen
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

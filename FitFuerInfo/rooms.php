@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
 
-    // Basic validation
+    // Grundlegende Validierung
     if (!empty($room_ids) && is_array($room_ids) && $course_id && $start_time && $end_time && $start_time < $end_time) {
         $course = getCourse($pdo, $course_id);
         $course_sw = getCourseSoftware($pdo, $course_id);
@@ -31,11 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             }
         }
         
-        // Check capacity across all selected rooms
+        // Kapazität über alle ausgewählten Räume prüfen
         if ($course['max_participants'] > $total_workstations) {
             $error = 'Die ausgewählten Räume haben in Summe nicht genügend Arbeitsplätze für diesen Kurs.';
         } else {
-            // Check software for EACH selected room
+            // Software für JEDEN ausgewählten Raum prüfen
             $missing_sw = false;
             foreach ($rooms_data as $r_data) {
                 $room_sw = getRoomSoftware($pdo, $r_data['id']);
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 foreach ($course_sw as $csw) {
                     if (!in_array($csw['id'], $room_sw_ids)) {
                         $missing_sw = true;
-                        break 2; // Break out of both loops
+                        break 2; // Beide Schleifen verlassen
                     }
                 }
             }
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if ($missing_sw) {
                 $error = 'Einer oder mehrere der ausgewählten Räume verfügen nicht über alle für den Kurs benötigten Softwarepakete.';
             } else {
-                // Check overlaps for EACH selected room
+                // Überschneidungen für JEDEN ausgewählten Raum prüfen
                 $overlap = false;
                 foreach ($rooms_data as $r_data) {
                     $stmt = $pdo->prepare("SELECT COUNT(*) FROM bookings WHERE room_id = ? AND ((start_time < ? AND end_time > ?) OR (start_time < ? AND end_time > ?))");
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 if ($overlap) {
                     $error = 'Einer der ausgewählten Räume ist in diesem Zeitraum bereits gebucht.';
                 } else {
-                    // All checks passed, insert bookings
+                    // Alle Prüfungen bestanden, Buchungen eintragen
                     $pdo->beginTransaction();
                     try {
                         $stmt = $pdo->prepare("INSERT INTO bookings (room_id, course_id, user_id, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch data for view
+// Daten für die Ansicht abrufen
 $rooms = $pdo->query("SELECT * FROM rooms ORDER BY name")->fetchAll();
 $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
 ?>
@@ -98,7 +98,7 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
     <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
     <div style="display: flex; gap: 2rem;">
-        <!-- Room List -->
+        <!-- Raumliste -->
         <div style="flex: 1;">
             <h3>Unsere Räume</h3>
             <?php foreach ($rooms as $r): ?>
@@ -116,7 +116,7 @@ $courses = $pdo->query("SELECT * FROM courses ORDER BY title")->fetchAll();
             <?php endforeach; ?>
         </div>
 
-        <!-- Booking Form -->
+        <!-- Buchungsformular -->
         <div style="flex: 1;">
             <div class="card" style="margin-bottom: 0;">
                 <h3>Raum buchen</h3>

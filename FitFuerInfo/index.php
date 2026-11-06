@@ -6,7 +6,7 @@ require_once 'includes/header.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Get user's bookings
+// Buchungen des Benutzers abrufen
 $stmt = $pdo->prepare("
     SELECT b.*, r.name as room_name, c.title as course_title 
     FROM bookings b
@@ -18,7 +18,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$user_id]);
 $my_bookings = $stmt->fetchAll();
 
-// Get user's courses
+// Kurse des Benutzers abrufen
 $stmt = $pdo->prepare("
     SELECT c.* FROM courses c
     LEFT JOIN course_owners co ON c.id = co.course_id

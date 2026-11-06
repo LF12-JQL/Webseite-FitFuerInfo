@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     $stmt = $pdo->prepare("UPDATE courses SET title = ?, max_participants = ? WHERE id = ?");
                     $stmt->execute([$title, $max_participants, $course_id]);
 
-                    // Update software
+                    // Software aktualisieren
                     $pdo->prepare("DELETE FROM course_software WHERE course_id = ?")->execute([$course_id]);
                     foreach ($software as $soft_id) {
                         $stmt = $pdo->prepare("INSERT INTO course_software (course_id, software_id) VALUES (?, ?)");
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     }
                     $pdo->commit();
                     $success = 'Kursprofil aktualisiert.';
-                    $course = getCourse($pdo, $course_id); // reload
+                    $course = getCourse($pdo, $course_id); // neu laden
                 } catch (Exception $e) {
                     $pdo->rollBack();
                     $error = 'Fehler beim Aktualisieren.';

@@ -3,7 +3,7 @@
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 
-// Check if any users exist
+// Prüfen, ob bereits Benutzer existieren
 $stmt = $pdo->query("SELECT COUNT(*) FROM users");
 $user_count = $stmt->fetchColumn();
 

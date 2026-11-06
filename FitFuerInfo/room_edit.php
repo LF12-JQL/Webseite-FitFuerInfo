@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt = $pdo->prepare("UPDATE rooms SET name = ?, workstations = ? WHERE id = ?");
                 $stmt->execute([$name, $workstations, $room_id]);
 
-                // Update software
+                // Software aktualisieren
                 $pdo->prepare("DELETE FROM room_software WHERE room_id = ?")->execute([$room_id]);
                 foreach ($software as $soft_id) {
                     $stmt = $pdo->prepare("INSERT INTO room_software (room_id, software_id) VALUES (?, ?)");
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 
                 $pdo->commit();
                 $success = 'Raum aktualisiert.';
-                $room = getRoom($pdo, $room_id); // reload
+                $room = getRoom($pdo, $room_id); // neu laden
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $error = 'Fehler beim Aktualisieren des Raums.';

@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
                 
                 if (!$error) {
-                    // Reload data
+                    // Daten neu laden
                     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
                     $stmt->execute([$target_user_id]);
                     $target_user = $stmt->fetch();

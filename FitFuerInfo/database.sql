@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS fitfuerinfo CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 USE fitfuerinfo;
 
--- Users table
+-- Benutzertabelle
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -10,20 +10,20 @@ CREATE TABLE IF NOT EXISTS users (
     password_change_status ENUM('none', 'requested', 'approved') NOT NULL DEFAULT 'none'
 ) ENGINE=InnoDB;
 
--- Software packages
+-- Softwarepakete
 CREATE TABLE IF NOT EXISTS software (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- Rooms
+-- Räume
 CREATE TABLE IF NOT EXISTS rooms (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     workstations INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB;
 
--- Room Software
+-- Raum-Software
 CREATE TABLE IF NOT EXISTS room_software (
     room_id INT NOT NULL,
     software_id INT NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS room_software (
     FOREIGN KEY (software_id) REFERENCES software(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Room Editors
+-- Raum-Bearbeiter
 CREATE TABLE IF NOT EXISTS room_editors (
     room_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS room_editors (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Courses
+-- Kurse
 CREATE TABLE IF NOT EXISTS courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS courses (
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Course Owners (employees who can edit)
+-- Kursverantwortliche (Mitarbeiter mit Bearbeitungsrecht)
 CREATE TABLE IF NOT EXISTS course_owners (
     course_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS course_owners (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Course Software (required software)
+-- Kurs-Software (benötigte Software)
 CREATE TABLE IF NOT EXISTS course_software (
     course_id INT NOT NULL,
     software_id INT NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS course_software (
     FOREIGN KEY (software_id) REFERENCES software(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Bookings
+-- Buchungen
 CREATE TABLE IF NOT EXISTS bookings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     room_id INT NOT NULL,
@@ -81,9 +81,9 @@ CREATE TABLE IF NOT EXISTS bookings (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Dummy Data
+-- Beispieldaten
 
--- Dummy users removed to enforce setup.php on first visit
+-- Beispielbenutzer entfernt, damit beim ersten Aufruf setup.php erzwungen wird
 
 INSERT IGNORE INTO software (id, name) VALUES 
 (1, 'Microsoft Office'), (2, 'Visual Studio Code'), (3, 'Wireshark'), (4, 'Adobe Photoshop');
